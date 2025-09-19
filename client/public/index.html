@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="description" content="LegalEase AI - Simplify legal documents with AI. Get plain-language summaries, risk analysis, and instant answers to your questions about contracts and legal documents." />
+    <meta name="keywords" content="legal documents, AI, document analysis, contract review, legal tech, document summarization" />
+    <meta name="author" content="LegalEase AI Team" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="LegalEase AI - Simplify Legal Documents with AI" />
+    <meta property="og:description" content="Upload contracts, agreements, and legal documents to get plain-language summaries, risk analysis, and instant answers to your questions." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://legalease-ai.com" />
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LegalEase AI - Simplify Legal Documents with AI" />
+    <meta name="twitter:description" content="Upload contracts, agreements, and legal documents to get plain-language summaries, risk analysis, and instant answers to your questions." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/og-image.png" />
+    
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <title>LegalEase AI - Simplify Legal Documents with AI</title>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LegalEase AI",
+      "description": "AI-powered legal document simplification service",
+      "url": "https://legalease-ai.com",
+      "applicationCategory": "LegalTech",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "LegalEase AI",
+        "url": "https://legalease-ai.com"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    
+    <!-- Loading fallback -->
+    <div id="loading-fallback" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #f1f5f9 0%, #e0f2fe 50%, #e0e7ff 100%); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+      <div style="width: 60px; height: 60px; border: 4px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <p style="margin-top: 20px; color: #64748b; font-family: 'Inter', sans-serif;">Loading LegalEase AI...</p>
+    </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    
+    <script>
+      // Show loading fallback if app takes too long to load
+      setTimeout(() => {
+        const loadingFallback = document.getElementById('loading-fallback');
+        if (loadingFallback && !document.querySelector('#root > *')) {
+          loadingFallback.style.display = 'flex';
+        }
+      }, 3000);
+    </script>
+  </body>
+</html>
