@@ -108,6 +108,16 @@ check_gcloud() {
     fi
 }
 
+# Check PM2 (optional)
+check_pm2() {
+    if command -v pm2 &> /dev/null; then
+        print_status "PM2 is installed (optional for production)"
+    else
+        print_info "PM2 not installed (optional for production process management)"
+        print_info "Install with: npm install -g pm2"
+    fi
+}
+
 # Display setup instructions
 display_instructions() {
     echo ""
@@ -130,7 +140,11 @@ display_instructions() {
     echo "3. Start development server:"
     echo "   npm run dev"
     echo ""
-    echo "4. Open http://localhost:3000 in your browser"
+    echo "4. For production deployment:"
+    echo "   npm run build && npm start"
+    echo "   # Or use PM2: pm2 start server/index.js --name legalease-ai"
+    echo ""
+    echo "5. Open http://localhost:3000 in your browser"
     echo ""
     echo "For detailed setup instructions, see README.md"
 }
@@ -141,6 +155,7 @@ main() {
     check_nodejs
     check_npm
     check_gcloud
+    check_pm2
     
     echo ""
     echo "Installing application..."

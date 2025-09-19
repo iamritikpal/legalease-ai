@@ -172,53 +172,28 @@ LegalEase AI is a comprehensive web application that uses Google Cloud's Generat
    - Backend server on http://localhost:5000
    - Frontend development server on http://localhost:3000
 
-## 🐳 Docker Deployment
+## 🚀 Production Deployment
 
-### Build and Run with Docker
-
-```bash
-# Build the Docker image
-docker build -t legalease-ai .
-
-# Run the container
-docker run -d \
-  --name legalease-ai \
-  -p 5000:5000 \
-  --env-file server/.env \
-  -v $(pwd)/server/service-account-key.json:/app/service-account-key.json:ro \
-  legalease-ai
-```
-
-### Using Docker Compose
+### Direct Node.js Deployment
 
 ```bash
-# Start the application
-docker-compose up -d
+# Install production dependencies
+npm run install-all
 
-# View logs
-docker-compose logs -f
+# Build the frontend
+cd client && npm run build && cd ..
 
-# Stop the application
-docker-compose down
+# Start the production server
+cd server && npm start
 ```
-
-## 🌐 Production Deployment
 
 ### Google Cloud Run (Recommended)
 
-1. **Build and Push to Container Registry**
+1. **Deploy to Cloud Run**
    ```bash
-   # Build and tag the image
-   docker build -t gcr.io/your-project-id/legalease-ai .
-   
-   # Push to Google Container Registry
-   docker push gcr.io/your-project-id/legalease-ai
-   ```
-
-2. **Deploy to Cloud Run**
-   ```bash
+   # Deploy directly from source
    gcloud run deploy legalease-ai \
-     --image gcr.io/your-project-id/legalease-ai \
+     --source . \
      --platform managed \
      --region us-central1 \
      --allow-unauthenticated \
@@ -231,11 +206,13 @@ docker-compose down
 
 ### Alternative Deployment Options
 
-- **Google Kubernetes Engine (GKE)**
+- **Google App Engine**
 - **Google Compute Engine**
-- **AWS ECS/EKS**
-- **Azure Container Instances**
+- **AWS Elastic Beanstalk**
+- **Azure App Service**
 - **DigitalOcean App Platform**
+- **Heroku**
+- **Vercel** (frontend) + **Railway** (backend)
 
 ## 📊 Monitoring and Logging
 
@@ -386,8 +363,8 @@ tail -f server/logs/combined.log
 # View error logs only
 tail -f server/logs/error.log
 
-# Docker logs
-docker logs -f legalease-ai
+# Application logs
+tail -f server/logs/combined.log
 ```
 
 ## 📈 Performance Optimization

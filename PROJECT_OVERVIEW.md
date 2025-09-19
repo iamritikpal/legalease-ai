@@ -41,8 +41,6 @@ LegalEaseAI/
 │   ├── index.js         # Server entry point
 │   └── package.json     # Backend dependencies
 │
-├── Dockerfile           # Container configuration
-├── docker-compose.yml   # Multi-container setup
 ├── setup.sh            # Automated setup script
 └── README.md           # Comprehensive documentation
 ```
@@ -118,11 +116,11 @@ LegalEaseAI/
 - **Cloud Run** - Serverless container platform (deployment)
 
 ### DevOps & Deployment
-- **Docker** - Containerization
-- **Docker Compose** - Multi-container orchestration
 - **Google Cloud Run** - Serverless deployment
+- **Google App Engine** - Platform-as-a-Service
 - **GitHub Actions** - CI/CD (optional)
 - **Nginx** - Reverse proxy (optional)
+- **PM2** - Process management for Node.js
 
 ## 🔄 Data Flow
 
@@ -203,21 +201,26 @@ npm run dev  # Starts both frontend and backend
 ```
 
 ### Production Options
-1. **Docker Container**
-   ```bash
-   docker build -t legalease-ai .
-   docker run -p 5000:5000 legalease-ai
-   ```
-
-2. **Google Cloud Run** (Recommended)
+1. **Google Cloud Run** (Recommended)
    ```bash
    gcloud run deploy --source .
+   ```
+
+2. **Google App Engine**
+   ```bash
+   gcloud app deploy
    ```
 
 3. **Traditional VPS**
    ```bash
    npm run build
    npm start
+   ```
+
+4. **PM2 Process Manager**
+   ```bash
+   npm install -g pm2
+   pm2 start server/index.js --name legalease-ai
    ```
 
 ## 📈 Monitoring & Analytics
