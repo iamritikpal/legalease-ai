@@ -6,11 +6,11 @@ module.exports = {
     exec_mode: 'cluster',
     env: {
       NODE_ENV: 'development',
-      PORT: 7000
+      PORT: 4000
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 7000
+      PORT: 4000
     },
     error_file: './server/logs/err.log',
     out_file: './server/logs/out.log',

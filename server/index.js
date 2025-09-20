@@ -12,12 +12,12 @@ const { rateLimiter } = require('./middleware/rateLimiter');
 const logger = require('./utils/logger');
 
 const app = express();
-const PORT = process.env.PORT || 7000;
+const PORT = process.env.PORT || 4000;
 
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:4000',
+  origin: process.env.CLIENT_URL || 'http://localhost:3001',
   credentials: true
 }));
 
