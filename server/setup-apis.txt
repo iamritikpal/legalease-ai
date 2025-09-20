@@ -1,0 +1,28 @@
+MANUAL STEPS TO ENABLE GOOGLE CLOUD APIS:
+
+1. Go to: https://console.cloud.google.com/
+2. Select project: h2skill-472620
+3. Go to "APIs & Services" > "Library"
+4. Search and enable these APIs:
+   - Document AI API
+   - AI Platform API (Vertex AI)
+   - Cloud Resource Manager API
+
+5. Create Document AI Processor:
+   - Go to Document AI console: https://console.cloud.google.com/ai/document-ai
+   - Click "Create Processor"
+   - Select "Document OCR"
+   - Region: "us"
+   - Name: "legalease-processor"
+   - Copy the Processor ID
+
+6. Update the .env file:
+   - Replace "REPLACE_WITH_YOUR_PROCESSOR_ID" with your actual processor ID
+
+7. Verify service account permissions:
+   - Go to IAM & Admin > IAM
+   - Find: h2skill@h2skill-472620.iam.gserviceaccount.com
+   - Ensure it has these roles:
+     * Document AI API User
+     * AI Platform User
+     * Vertex AI User

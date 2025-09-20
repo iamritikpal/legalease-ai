@@ -1,23 +1,24 @@
+const { PredictionServiceClient } = require('@google-cloud/aiplatform');
 const { VertexAI } = require('@google-cloud/vertexai');
 const logger = require('../utils/logger');
 
 class VertexAIService {
   constructor() {
-    this.vertex_ai = new VertexAI({
-      project: process.env.GOOGLE_CLOUD_PROJECT_ID,
-      location: process.env.VERTEX_AI_LOCATION || 'us-central1',
+    this.client = new PredictionServiceClient({
+      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
     });
     
-    this.model = process.env.VERTEX_AI_MODEL || 'gemini-pro';
-    this.generativeModel = this.vertex_ai.preview.getGenerativeModel({
-      model: this.model,
-      generation_config: {
-        max_output_tokens: 8192,
-        temperature: 0.3,
-        top_p: 0.8,
-        top_k: 40,
-      },
+    // Initialize Vertex AI for Gemini models
+    this.vertexAI = new VertexAI({
+      project: process.env.GOOGLE_CLOUD_PROJECT_ID,
+      location: process.env.VERTEX_AI_LOCATION || 'us-central1',
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
     });
+    
+    this.projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
+    this.location = process.env.VERTEX_AI_LOCATION || 'us-central1';
+    this.model = process.env.VERTEX_AI_MODEL || 'gemini-2.5-flash';
   }
 
   /**
@@ -57,19 +58,12 @@ ${documentText.substring(0, 15000)} // Limit text to avoid token limits
 Please provide a comprehensive but concise analysis.
 `;
 
-      const result = await this.generativeModel.generateContent(prompt);
-      const response = result.response;
-      
-      if (!response || !response.candidates || !response.candidates[0]) {
-        throw new Error('No response generated from Vertex AI');
-      }
-
-      const summaryText = response.candidates[0].content.parts[0].text;
+      const response = await this.callVertexAI(prompt);
       
       logger.info(`Summary generated successfully in ${language}`);
       
       return {
-        summary: summaryText,
+        summary: response,
         language,
         generatedAt: new Date().toISOString(),
         model: this.model,
@@ -93,63 +87,40 @@ Please provide a comprehensive but concise analysis.
         : 'Please respond in English';
 
       const prompt = `
-You are a legal risk analyst. Analyze this document for potential risks and red flags.
+You are a legal expert specializing in risk analysis. Analyze this legal document and identify potential risks and red flags.
 ${languageInstruction}
 
-Look for and highlight:
+Please provide a comprehensive risk analysis with:
 
-1. HIGH-RISK CLAUSES:
-   - Unlimited liability provisions
-   - Automatic renewal clauses
-   - Harsh penalty terms
-   - Broad indemnification requirements
-   - Waiver of important rights
+1. HIGH-RISK CLAUSES: Identify clauses that pose significant legal or financial risks
+2. FINANCIAL RISKS: Any hidden costs, penalties, or unfavorable financial terms
+3. UNFAIR TERMS: One-sided obligations or terms that heavily favor one party
+4. UNCLEAR LANGUAGE: Vague or ambiguous terms that could cause disputes
+5. MISSING PROTECTIONS: Important protections or rights that should be included
+6. TERMINATION RISKS: Unfavorable termination conditions or penalties
+7. LIABILITY CONCERNS: Excessive liability or indemnification requirements
+8. COMPLIANCE ISSUES: Terms that might conflict with laws or regulations
 
-2. FINANCIAL RISKS:
-   - Hidden fees or charges
-   - Penalty clauses
-   - Interest rates above market
-   - Collateral requirements
-   - Personal guarantees
-
-3. UNFAIR TERMS:
-   - One-sided obligations
-   - Unreasonable restrictions
-   - Broad non-compete clauses
-   - Excessive termination penalties
-   - Limited recourse options
-
-4. UNCLEAR TERMS:
-   - Vague language that could be misinterpreted
-   - Missing important details
-   - Contradictory clauses
-
-For each risk identified, provide:
-- Risk level (LOW, MEDIUM, HIGH, CRITICAL)
-- Specific clause or section
-- Plain language explanation of the risk
+For each risk, indicate:
+- Risk Level: HIGH, MEDIUM, or LOW
+- Brief explanation of why it's risky
 - Potential consequences
-- Suggested action or consideration
+
+Format as clear bullet points under each category.
+Use simple language that non-lawyers can understand.
 
 Document text:
-${documentText.substring(0, 15000)}
+${documentText.substring(0, 15000)} // Limit text to avoid token limits
 
-Focus on the most significant risks that could impact the parties involved.
+Provide a thorough but concise risk analysis.
 `;
 
-      const result = await this.generativeModel.generateContent(prompt);
-      const response = result.response;
+      const response = await this.callVertexAI(prompt);
       
-      if (!response || !response.candidates || !response.candidates[0]) {
-        throw new Error('No risk analysis generated from Vertex AI');
-      }
-
-      const riskAnalysis = response.candidates[0].content.parts[0].text;
-      
-      logger.info(`Risk analysis completed in ${language}`);
+      logger.info(`Risk analysis generated successfully in ${language}`);
       
       return {
-        riskAnalysis,
+        risks: response,
         language,
         generatedAt: new Date().toISOString(),
         model: this.model,
@@ -173,47 +144,44 @@ Focus on the most significant risks that could impact the parties involved.
         ? 'Please respond in Hindi (हिंदी में उत्तर दें)'
         : 'Please respond in English';
 
-      // Find relevant sections using simple keyword matching
+      // Find relevant sections for better context
       const relevantSections = this.findRelevantSections(question, documentText);
-      
+
       const prompt = `
-You are a legal assistant helping someone understand their legal document.
+You are a legal expert helping people understand legal documents. A user has asked a specific question about their legal document.
 ${languageInstruction}
 
-Based on the following legal document, please answer this question: "${question}"
+User's Question: "${question}"
 
-Relevant sections from the document:
+Based on this legal document, please provide a comprehensive answer that:
+
+1. DIRECT ANSWER: Answer the specific question clearly and directly
+2. RELEVANT CLAUSES: Quote and explain the specific clauses that relate to the question
+3. IMPLICATIONS: Explain what this means in practical terms
+4. IMPORTANT DETAILS: Highlight any important dates, conditions, or requirements
+5. POTENTIAL ISSUES: Point out any potential problems or things to watch out for
+6. NEXT STEPS: Suggest what the user should do or consider
+
+Use simple, clear language that a non-lawyer can understand.
+Always include relevant quotes from the document to support your answer.
+
+Relevant document sections:
 ${relevantSections}
 
-Full document context (first 10000 characters):
-${documentText.substring(0, 10000)}
+Full document context (if needed):
+${documentText.substring(0, 10000)} // Limit for context
 
-Please provide:
-1. A direct answer to the question
-2. Reference to specific clauses or sections if applicable
-3. Explanation in simple, non-legal language
-4. Any important caveats or additional considerations
-
-If the document doesn't contain information to answer the question, please say so clearly.
-
-IMPORTANT: Base your answer only on the information in the document. Do not provide general legal advice.
-Add this disclaimer: "This is informational only and not legal advice. Consult a qualified attorney for legal guidance."
+**Important**: End your response with this disclaimer:
+"**Disclaimer**: This is informational analysis only and not legal advice. For legal guidance specific to your situation, please consult a qualified attorney."
 `;
 
-      const result = await this.generativeModel.generateContent(prompt);
-      const response = result.response;
-      
-      if (!response || !response.candidates || !response.candidates[0]) {
-        throw new Error('No answer generated from Vertex AI');
-      }
-
-      const answer = response.candidates[0].content.parts[0].text;
+      const response = await this.callVertexAI(prompt);
       
       logger.info(`Question answered successfully in ${language}`);
       
       return {
         question,
-        answer,
+        answer: response,
         relevantSections: relevantSections.length > 0,
         language,
         generatedAt: new Date().toISOString(),
@@ -264,36 +232,37 @@ Add this disclaimer: "This is informational only and not legal advice. Consult a
         : 'Please respond in English';
 
       const prompt = `
-You are a legal translator who converts complex legal language into simple, everyday language.
+You are a legal expert who specializes in explaining complex legal language in simple terms. 
 ${languageInstruction}
 
-Please explain this legal clause in simple terms that anyone can understand:
+Please explain this legal clause in plain English that anyone can understand:
 
 "${clause}"
 
-Provide:
-1. What this clause means in plain language
-2. What obligations or rights it creates
-3. Any potential risks or benefits
-4. A simple example if helpful
+Provide a comprehensive explanation that includes:
 
-Use everyday words and avoid legal jargon.
+1. SIMPLE EXPLANATION: What does this clause mean in everyday language?
+2. KEY OBLIGATIONS: What does each party have to do because of this clause?
+3. RIGHTS GRANTED: What rights or protections does this clause provide?
+4. CONSEQUENCES: What happens if someone doesn't follow this clause?
+5. PRACTICAL IMPACT: How does this affect the people involved in real life?
+6. POTENTIAL RISKS: Are there any risks or downsides to be aware of?
+7. IMPORTANT NOTES: Any critical details, exceptions, or conditions?
+
+Use simple words and avoid legal jargon. Explain any technical terms you must use.
+Break down complex sentences into easier parts.
+Use examples if helpful to illustrate the meaning.
+
+Format your response clearly with headings and bullet points where appropriate.
 `;
 
-      const result = await this.generativeModel.generateContent(prompt);
-      const response = result.response;
-      
-      if (!response || !response.candidates || !response.candidates[0]) {
-        throw new Error('No explanation generated from Vertex AI');
-      }
-
-      const explanation = response.candidates[0].content.parts[0].text;
+      const response = await this.callVertexAI(prompt);
       
       logger.info(`Clause explained successfully in ${language}`);
       
       return {
         originalClause: clause,
-        explanation,
+        explanation: response,
         language,
         generatedAt: new Date().toISOString(),
         model: this.model,
@@ -302,6 +271,229 @@ Use everyday words and avoid legal jargon.
       logger.error('Error explaining clause with Vertex AI:', error);
       throw new Error('Failed to explain clause');
     }
+  }
+
+  /**
+   * Helper method to call Vertex AI
+   * @param {string} prompt - The prompt to send
+   * @returns {Promise<string>} AI response
+   */
+  async callVertexAI(prompt) {
+    try {
+      // Check if we're using a Gemini model
+      if (this.model.includes('gemini')) {
+        return await this.callVertexGenerativeAPI(prompt);
+      } else {
+        return await this.callVertexPredictAPI(prompt);
+      }
+    } catch (error) {
+      logger.error('Error calling Vertex AI:', error);
+      return this.getFallbackResponse(error);
+    }
+  }
+
+  /**
+   * Call Vertex AI Generative Service for Gemini models
+   * @param {string} prompt - The prompt to send
+   * @returns {Promise<string>} AI response
+   */
+  async callVertexGenerativeAPI(prompt) {
+    try {
+      // Get the generative model
+      const model = this.vertexAI.getGenerativeModel({
+        model: this.model,
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 2048,
+          topP: 0.8,
+          topK: 40
+        },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          }
+        ]
+      });
+
+      logger.info(`Calling Vertex AI Generative Service: ${this.model} at ${this.location}`);
+
+      // Generate content
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      
+      // Extract text from the response
+      let responseText = '';
+      if (response.candidates && response.candidates.length > 0) {
+        const candidate = response.candidates[0];
+        if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+          responseText = candidate.content.parts[0].text;
+        }
+      }
+
+      if (!responseText) {
+        throw new Error('No text content in Vertex AI response');
+      }
+
+      logger.info('Vertex AI Generative Service response received successfully');
+      return responseText;
+    } catch (error) {
+      logger.error('Error calling Vertex AI Generative Service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Call Vertex AI Predict API for non-Gemini models
+   * @param {string} prompt - The prompt to send
+   * @returns {Promise<string>} AI response
+   */
+  async callVertexPredictAPI(prompt) {
+    try {
+      // Construct the endpoint for Vertex AI model
+      const endpoint = `projects/${this.projectId}/locations/${this.location}/publishers/google/models/${this.model}`;
+      
+      // Prepare the request payload
+      const instanceValue = {
+        contents: [{
+          role: 'user',
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generation_config: {
+          temperature: 0.2,
+          max_output_tokens: 2048,
+          top_p: 0.8,
+          top_k: 40
+        },
+        safety_settings: [
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+          }
+        ]
+      };
+
+      const instances = [instanceValue];
+      
+      const request = {
+        endpoint,
+        instances,
+      };
+
+      logger.info(`Calling Vertex AI Predict API: ${this.model} at ${this.location}`);
+
+      // Make the prediction request
+      const [response] = await this.client.predict(request);
+      
+      if (!response.predictions || response.predictions.length === 0) {
+        throw new Error('No predictions returned from Vertex AI');
+      }
+
+      const prediction = response.predictions[0];
+      
+      // Extract text from response
+      let responseText = '';
+      if (prediction.candidates && prediction.candidates.length > 0) {
+        const candidate = prediction.candidates[0];
+        if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+          responseText = candidate.content.parts[0].text;
+        }
+      }
+
+      if (!responseText) {
+        throw new Error('No text content in Vertex AI response');
+      }
+
+      logger.info('Vertex AI response received successfully');
+      return responseText;
+      
+    } catch (error) {
+      logger.error('Error calling Vertex AI:', error);
+      return this.getFallbackResponse(error);
+    }
+  }
+
+  /**
+   * Get fallback response when AI fails
+   * @param {Error} error - The error that occurred
+   * @returns {string} Fallback response
+   */
+  getFallbackResponse(error) {
+    // Check for permission errors
+    if (error.message.includes('PERMISSION_DENIED') || error.code === 7) {
+      logger.error('Permission denied for Vertex AI. Please check IAM permissions.');
+      
+      // Return helpful fallback with permission instructions
+      return `
+VERTEX AI PERMISSION ERROR
+
+Your service account needs Vertex AI permissions. Here's how to fix it:
+
+1. Go to: https://console.cloud.google.com/iam-admin/iam?project=${this.projectId}
+2. Find service account: h2skill@h2skill-472620.iam.gserviceaccount.com  
+3. Add these roles:
+   - Vertex AI User
+   - AI Platform User
+   - ML Developer
+
+4. Enable Vertex AI API:
+   - Go to: https://console.cloud.google.com/apis/library/aiplatform.googleapis.com
+   - Click "Enable"
+
+5. Try again after fixing permissions
+
+Current config: ${this.projectId}/${this.location}/${this.model}
+
+This is a permission error response. Fix the above permissions for real AI analysis.
+`;
+    }
+    
+    // For other errors, provide helpful fallback
+    logger.warn('Using fallback response due to Vertex AI error');
+    return `
+VERTEX AI CONFIGURATION NEEDED
+
+There was an issue connecting to Vertex AI. This could be due to:
+
+1. Missing API enablement
+2. Incorrect model configuration  
+3. Network connectivity issues
+
+Current configuration:
+- Project: ${this.projectId}
+- Location: ${this.location}
+- Model: ${this.model}
+
+Please check your Google Cloud setup and try again.
+
+This is a fallback response. The document analysis would appear here once Vertex AI is properly configured.
+`;
   }
 }
 

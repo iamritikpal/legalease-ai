@@ -131,3 +131,5 @@ build/
 *.njsproj
 *.sln
 *.sw?
+./server/ke2.json
+key.json

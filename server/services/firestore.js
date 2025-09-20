@@ -1,81 +1,83 @@
-const { Firestore } = require('@google-cloud/firestore');
+const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 
 class FirestoreService {
   constructor() {
-    this.db = new Firestore({
-      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-      databaseId: process.env.FIRESTORE_DATABASE_ID || '(default)',
-    });
-    
-    // Collection references
-    this.documentsCollection = this.db.collection('documents');
-    this.sessionsCollection = this.db.collection('sessions');
-    this.analyticsCollection = this.db.collection('analytics');
+    // Mock in-memory storage for demonstration
+    logger.info('Using mock in-memory storage (no cloud database)');
+    this.documents = new Map();
+    this.sessions = new Map();
+    this.analytics = new Map();
   }
 
   /**
-   * Save document metadata and processing results
+   * Save document metadata and processing results (in memory)
    * @param {Object} documentData - Document information
    * @returns {Promise<string>} Document ID
    */
   async saveDocument(documentData) {
     try {
-      const docRef = await this.documentsCollection.add({
+      const docId = uuidv4();
+      const docWithMeta = {
         ...documentData,
+        id: docId,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      };
       
-      logger.info(`Document saved to Firestore: ${docRef.id}`);
-      return docRef.id;
+      this.documents.set(docId, docWithMeta);
+      logger.info(`Document saved to memory storage: ${docId}`);
+      return docId;
     } catch (error) {
-      logger.error('Error saving document to Firestore:', error);
+      logger.error('Error saving document to memory storage:', error);
       throw new Error('Failed to save document data');
     }
   }
 
   /**
-   * Get document by ID
+   * Get document by ID (from memory)
    * @param {string} documentId - Document ID
    * @returns {Promise<Object>} Document data
    */
   async getDocument(documentId) {
     try {
-      const docSnap = await this.documentsCollection.doc(documentId).get();
+      const document = this.documents.get(documentId);
       
-      if (!docSnap.exists) {
+      if (!document) {
         throw new Error('Document not found');
       }
       
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-      };
+      return document;
     } catch (error) {
-      logger.error('Error getting document from Firestore:', error);
+      logger.error('Error getting document from memory storage:', error);
       throw new Error('Failed to retrieve document');
     }
   }
 
   /**
-   * Update document with processing results
+   * Update document with processing results (in memory)
    * @param {string} documentId - Document ID
    * @param {Object} updateData - Data to update
    * @returns {Promise<boolean>} Success status
    */
   async updateDocument(documentId, updateData) {
     try {
-      await this.documentsCollection.doc(documentId).update({
+      const document = this.documents.get(documentId);
+      if (!document) {
+        throw new Error('Document not found');
+      }
+      
+      const updatedDocument = {
+        ...document,
         ...updateData,
         updatedAt: new Date(),
-      });
+      };
       
-      logger.info(`Document updated in Firestore: ${documentId}`);
+      this.documents.set(documentId, updatedDocument);
+      logger.info(`Document updated in memory storage: ${documentId}`);
       return true;
     } catch (error) {
-      logger.error('Error updating document in Firestore:', error);
+      logger.error('Error updating document in memory storage:', error);
       throw new Error('Failed to update document');
     }
   }
@@ -145,53 +147,56 @@ class FirestoreService {
   }
 
   /**
-   * Save Q&A interaction
+   * Save Q&A interaction (in memory)
    * @param {string} documentId - Document ID
    * @param {Object} qaData - Question and answer data
    * @returns {Promise<string>} QA ID
    */
   async saveQA(documentId, qaData) {
     try {
-      const qaRef = await this.documentsCollection
-        .doc(documentId)
-        .collection('qa')
-        .add({
-          ...qaData,
-          createdAt: new Date(),
-        });
+      const document = this.documents.get(documentId);
+      if (!document) {
+        throw new Error('Document not found');
+      }
+      
+      const qaId = uuidv4();
+      const qaWithMeta = {
+        ...qaData,
+        id: qaId,
+        createdAt: new Date(),
+      };
+      
+      // Initialize qaHistory array if it doesn't exist
+      if (!document.qaHistory) {
+        document.qaHistory = [];
+      }
+      
+      document.qaHistory.unshift(qaWithMeta); // Add to beginning for latest first
+      this.documents.set(documentId, document);
       
       logger.info(`Q&A saved for document: ${documentId}`);
-      return qaRef.id;
+      return qaId;
     } catch (error) {
-      logger.error('Error saving Q&A to Firestore:', error);
+      logger.error('Error saving Q&A to memory storage:', error);
       throw new Error('Failed to save Q&A data');
     }
   }
 
   /**
-   * Get all Q&A for a document
+   * Get all Q&A for a document (from memory)
    * @param {string} documentId - Document ID
    * @returns {Promise<Array>} Array of Q&A data
    */
   async getDocumentQAs(documentId) {
     try {
-      const qaSnap = await this.documentsCollection
-        .doc(documentId)
-        .collection('qa')
-        .orderBy('createdAt', 'desc')
-        .get();
+      const document = this.documents.get(documentId);
+      if (!document) {
+        throw new Error('Document not found');
+      }
       
-      const qas = [];
-      qaSnap.forEach(doc => {
-        qas.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      
-      return qas;
+      return document.qaHistory || [];
     } catch (error) {
-      logger.error('Error getting Q&As from Firestore:', error);
+      logger.error('Error getting Q&As from memory storage:', error);
       throw new Error('Failed to retrieve Q&A data');
     }
   }
