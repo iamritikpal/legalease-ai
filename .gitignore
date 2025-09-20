@@ -96,7 +96,8 @@ jspm_packages/
 # Google Cloud service account keys
 service-account-key.json
 server/service-account-key.json
-*.json
+# *.json
+server/ke2.json
 
 # IDE files
 .vscode/

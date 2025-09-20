@@ -1,0 +1,75 @@
+{
+  "issues": [
+    "Full connection test failed"
+  ],
+  "solutions": [
+    "Check all previous issues and retry"
+  ],
+  "results": {
+    "environment": {
+      "GOOGLE_CLOUD_PROJECT_ID": {
+        "status": "PASS",
+        "value": "h2skill-472620"
+      },
+      "GOOGLE_APPLICATION_CREDENTIALS": {
+        "status": "PASS",
+        "value": "./ke2.json"
+      },
+      "VERTEX_AI_LOCATION": {
+        "status": "PASS",
+        "value": "us-central1"
+      },
+      "VERTEX_AI_MODEL": {
+        "status": "PASS",
+        "value": "gemini-2.5-flash"
+      }
+    },
+    "credentials": {
+      "path": {
+        "status": "PASS",
+        "path": "./ke2.json"
+      },
+      "format": {
+        "status": "PASS"
+      },
+      "type": {
+        "status": "PASS"
+      },
+      "project_id": {
+        "status": "PASS"
+      },
+      "private_key": {
+        "status": "PASS"
+      },
+      "client_email": {
+        "status": "PASS"
+      },
+      "email": {
+        "status": "PASS",
+        "value": "h2skill@h2skill-472620.iam.gserviceaccount.com"
+      }
+    },
+    "api": {
+      "client": {
+        "status": "PASS"
+      },
+      "endpoint": {
+        "status": "PASS",
+        "endpoint": "projects/h2skill-472620/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+    },
+    "model": {
+      "test": {
+        "status": "FAIL",
+        "error": "9 FAILED_PRECONDITION: Gemini cannot be accessed through Vertex Predict/RawPredict API. Please follow https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts/quickstart-multimodal for Gemini usage."
+      }
+    },
+    "connection": {
+      "full": {
+        "status": "FAIL",
+        "error": "9 FAILED_PRECONDITION: Gemini cannot be accessed through Vertex Predict/RawPredict API. Please follow https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts/quickstart-multimodal for Gemini usage."
+      }
+    },
+    "summary": {}
+  }
+}
