@@ -6,11 +6,17 @@ module.exports = {
     exec_mode: 'cluster',
     env: {
       NODE_ENV: 'development',
-      PORT: 4000
+      PORT: 4000,
+      GOOGLE_CLOUD_PROJECT_ID: 'h2skill-472620',
+      GOOGLE_APPLICATION_CREDENTIALS: './server/ke2.json',
+    VERTEX_AI_LOCATION: 'us-central1'
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 4000
+      PORT: 4000,
+      GOOGLE_CLOUD_PROJECT_ID: 'h2skill-472620',
+      GOOGLE_APPLICATION_CREDENTIALS: './server/ke2.json',
+      VERTEX_AI_LOCATION: 'us-central1'
     },
     error_file: './server/logs/err.log',
     out_file: './server/logs/out.log',
