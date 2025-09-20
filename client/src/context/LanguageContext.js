@@ -172,13 +172,25 @@ export const LanguageProvider = ({ children }) => {
 
   // Format date according to language
   const formatDate = useCallback((date, options = {}) => {
+    // Handle invalid or missing dates
+    if (!date) {
+      return 'Date not available';
+    }
+    
+    const dateObj = new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid date';
+    }
+    
     const locale = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
     return new Intl.DateTimeFormat(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       ...options,
-    }).format(new Date(date));
+    }).format(dateObj);
   }, [currentLanguage]);
 
   // Format number according to language

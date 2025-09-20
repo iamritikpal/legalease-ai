@@ -184,6 +184,44 @@
   }
 }
 
+/* Summary section styles */
+.summary-section {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
+
+.summary-section:hover {
+  transform: translateY(-2px);
+}
+
+.summary-icon {
+  @apply transition-all duration-300;
+}
+
+.summary-section:hover .summary-icon {
+  transform: scale(1.1);
+}
+
+/* Enhanced prose styles for summary content */
+.summary-prose {
+  line-height: 1.7;
+}
+
+.summary-prose h4 {
+  @apply text-lg font-semibold text-gray-900 mb-3;
+}
+
+.summary-prose p {
+  @apply text-gray-700 mb-2;
+}
+
+.summary-prose ul {
+  @apply list-disc list-inside space-y-1 text-gray-700;
+}
+
+.summary-prose li {
+  @apply leading-relaxed;
+}
+
 /* Print styles */
 @media print {
   .no-print {
@@ -192,5 +230,10 @@
   
   .print-break {
     page-break-before: always;
+  }
+  
+  .summary-section {
+    @apply shadow-none border border-gray-300 mb-4;
+    transform: none !important;
   }
 }
