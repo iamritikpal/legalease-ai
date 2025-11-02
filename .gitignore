@@ -1,3 +1,7 @@
+./ecosystem.config.js
+ecosystem.config.js
+ecosystem.config.js
+
 # Dependencies
 node_modules/
 /.pnp
@@ -134,3 +138,7 @@ build/
 *.sw?
 ./server/ke2.json
 key.json
+
+./ecosystem.config.js
+ecosystem.config.js
+ecosystem.config.js

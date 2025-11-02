@@ -21,7 +21,8 @@ app.use(cors({
     process.env.CLIENT_URL || 'http://localhost:3002',
     'http://localhost:3000',
     'http://20.235.242.145:3002',
-    'http://20.235.242.145:3000'
+    'http://20.235.242.145:3000',
+    'https://legalease-ai-rouge.vercel.app',
   ],
   credentials: true
 }));

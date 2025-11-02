@@ -89,7 +89,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <span>© 2024 LegalEase AI.</span>
+              <span>© 2025 LegalEase AI.</span>
               <span>{t('madeWith')}</span>
               <Heart className="w-4 h-4 text-red-500" />
               <span>for better legal accessibility.</span>

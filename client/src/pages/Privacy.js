@@ -47,7 +47,7 @@ const Privacy = () => {
               Your privacy and data security are our top priorities. Here's how we protect your information.
             </p>
             <p className="text-sm text-gray-500 mt-4">
-              Last updated: December 2024
+              Last updated: November 2025
             </p>
           </motion.div>
         </div>

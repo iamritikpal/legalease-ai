@@ -79,7 +79,7 @@ const Home = () => {
   ];
 
   const stats = [
-    { label: 'Documents Processed', value: '10,000+' },
+    { label: 'Documents Processed', value: '10,00+' },
     { label: 'Languages Supported', value: '2' },
     { label: 'Average Processing Time', value: '< 30s' },
     { label: 'User Satisfaction', value: '98%' },
@@ -117,9 +117,7 @@ const Home = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
                 
-                <button className="inline-flex items-center px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200">
-                  {t('howItWorks', 'How It Works')}
-                </button>
+                
               </div>
             </motion.div>
           </div>
