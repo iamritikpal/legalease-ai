@@ -37,24 +37,19 @@ const About = () => {
 
   const team = [
     {
-      name: 'Sarah Chen',
+      name: 'Yashi Pitti',
       role: 'AI/ML Engineer',
       description: 'Specialized in NLP and document processing systems.',
     },
     {
-      name: 'Rajesh Kumar',
-      role: 'Legal Tech Consultant',
-      description: 'Expert in legal document analysis and compliance.',
-    },
-    {
-      name: 'Maria Rodriguez',
+      name: 'Himesh Goyal',
       role: 'UX Designer',
       description: 'Focused on creating accessible and intuitive interfaces.',
     },
     {
-      name: 'David Park',
-      role: 'Cloud Architect',
-      description: 'Ensures scalable and secure cloud infrastructure.',
+      name: 'Ritik Pal',
+      role: 'Backend Developer',
+      description: 'Ensures scalable and secure infrastructure.',
     },
   ];
 
